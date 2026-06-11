@@ -316,4 +316,65 @@ router.get('/eod-summary', (req, res) => {
 
 });
 
+/*
+==================================================
+DELETE EOD REPORT
+==================================================
+*/
+
+router.delete('/eod/:id', (req, res) => {
+
+    const reportId = req.params.id;
+
+    const deleteTasksSql = `
+        DELETE FROM eod_tasks
+        WHERE eod_report_id = ?
+    `;
+
+    db.query(
+        deleteTasksSql,
+        [reportId],
+        (taskErr) => {
+
+            if (taskErr) {
+
+                console.log(taskErr);
+
+                return res.status(500).json({
+                    message: 'Task Delete Failed'
+                });
+
+            }
+
+            const deleteReportSql = `
+                DELETE FROM eod_reports_new
+                WHERE id = ?
+            `;
+
+            db.query(
+                deleteReportSql,
+                [reportId],
+                (reportErr) => {
+
+                    if (reportErr) {
+
+                        console.log(reportErr);
+
+                        return res.status(500).json({
+                            message: 'Report Delete Failed'
+                        });
+
+                    }
+
+                    res.status(200).json({
+                        message: 'EOD Deleted Successfully'
+                    });
+
+                }
+            );
+
+        }
+    );
+
+});
 module.exports = router;

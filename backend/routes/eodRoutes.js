@@ -377,4 +377,58 @@ router.delete('/eod/:id', (req, res) => {
     );
 
 });
+/*
+==================================================
+GET SINGLE EOD REPORT
+==================================================
+*/
+
+router.get('/eod/:id', (req, res) => {
+
+    const reportId = req.params.id;
+
+    const sql = `
+
+        SELECT
+
+            eod_reports_new.id,
+            eod_reports_new.report_date,
+
+            employees.employee_code,
+            employees.name,
+            employees.department,
+
+            eod_tasks.work_plan,
+            eod_tasks.client,
+            eod_tasks.status
+
+        FROM eod_reports_new
+
+        JOIN employees
+        ON employees.id = eod_reports_new.employee_id
+
+        JOIN eod_tasks
+        ON eod_tasks.eod_report_id = eod_reports_new.id
+
+        WHERE eod_reports_new.id = ?
+
+    `;
+
+    db.query(sql, [reportId], (err, result) => {
+
+        if (err) {
+
+            console.log(err);
+
+            return res.status(500).json({
+                message: 'Fetch Failed'
+            });
+
+        }
+
+        res.status(200).json(result);
+
+    });
+
+});
 module.exports = router;

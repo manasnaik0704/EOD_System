@@ -255,5 +255,65 @@ router.get('/eod', (req, res) => {
 });
 
 
+/*
+==================================================
+EOD SUMMARY REPORTS
+==================================================
+*/
+
+router.get('/eod-summary', (req, res) => {
+
+    const sql = `
+
+        SELECT
+
+            eod_reports_new.id AS report_id,
+
+            employees.employee_code,
+
+            employees.name,
+
+            eod_reports_new.department,
+
+            eod_reports_new.report_date,
+
+            COUNT(eod_tasks.id) AS task_count
+
+        FROM eod_reports_new
+
+        JOIN employees
+        ON employees.id = eod_reports_new.employee_id
+
+        LEFT JOIN eod_tasks
+        ON eod_tasks.eod_report_id = eod_reports_new.id
+
+        GROUP BY
+            eod_reports_new.id,
+            employees.employee_code,
+            employees.name,
+            eod_reports_new.department,
+            eod_reports_new.report_date
+
+        ORDER BY eod_reports_new.id DESC
+
+    `;
+
+    db.query(sql, (err, result) => {
+
+        if (err) {
+
+            console.log(err);
+
+            return res.status(500).json({
+                message: 'Summary Fetch Failed'
+            });
+
+        }
+
+        res.status(200).json(result);
+
+    });
+
+});
 
 module.exports = router;
